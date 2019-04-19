@@ -10,7 +10,7 @@
   redir /.well-known/carddav /remote.php/carddav 301
   redir /.well-known/caldav /remote.php/caldav 301
   
-  proxy /docs http://docs:80 {
+  proxy /docs http://onlyoffice-document-server:80 {
     transparent
   }
   

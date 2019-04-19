@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   app:
     container_name: app-server
@@ -7,9 +7,9 @@ services:
     tty: true
     restart: always
     expose:
-      - '80'
-      - '443'
-      - '9000'
+      - "80"
+      - "443"
+      - "9000"
     networks:
       - onlyoffice
     volumes:
@@ -20,7 +20,7 @@ services:
       - db.env
     depends_on:
       - db
-      
+
   db:
     image: mariadb
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
@@ -30,11 +30,10 @@ services:
     volumes:
       - db:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_ROOT_PASSWORD=password1234
     env_file:
       - db.env
-      
-  
+
   onlyoffice-document-server:
     container_name: onlyoffice-document-server
     image: onlyoffice/documentserver:latest
@@ -44,11 +43,12 @@ services:
     networks:
       - onlyoffice
     expose:
-      - '80'
-      - '443'
+      - "80"
+      - "443"
     volumes:
       - document_data:/var/www/onlyoffice/Data
       - document_log:/var/log/onlyoffice
+
   caddy:
     container_name: caddy-server
     image: abiosoft/caddy:no-stats
@@ -61,22 +61,24 @@ services:
     networks:
       - onlyoffice
     environment:
-    - CADDYPATH=/certs
-    - ACME_AGREE=true
-    # CHANGE THESE OR THE CONTAINER WILL FAIL TO RUN
-    - CADDY_LETSENCRYPT_EMAIL=certificates@example.com
-    - CADDY_EXTERNAL_DOMAIN=mydomain.com
-    - CADDY_PROXY_URL=http://app:80
+      - CADDYPATH=/certs
+      - ACME_AGREE=true
+      # CHANGE THESE OR THE CONTAINER WILL FAIL TO RUN
+      - CADDY_LETSENCRYPT_EMAIL=certificates@example.com
+      - CADDY_EXTERNAL_DOMAIN=mydomain.com
+      - CADDY_PROXY_URL=http://app:80
     volumes:
       - ./data/letsencrypt:/certs:rw
       - ./Caddyfile:/etc/Caddyfile:ro
       - app_data:/var/www/html
+
 networks:
   onlyoffice:
-    driver: 'bridge'
-volumes:
+    driver: "bridge"
+
+    volumes:
   document_data:
   document_log:
   app_data:
-  db: 
+  db:
   mysql_data:

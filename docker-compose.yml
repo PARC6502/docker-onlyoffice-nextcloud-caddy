@@ -2,17 +2,39 @@ version: '3'
 services:
   app:
     container_name: app-server
-    image: nextcloud:fpm
+    image: nextcloud:latest
     stdin_open: true
     tty: true
     restart: always
     expose:
       - '80'
+      - '443'
       - '9000'
     networks:
       - onlyoffice
     volumes:
       - app_data:/var/www/html
+    environment:
+      - MYSQL_HOST=db
+    env_file:
+      - db.env
+    depends_on:
+      - db
+      
+  db:
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    networks:
+      - onlyoffice
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=
+    env_file:
+      - db.env
+      
+  
   onlyoffice-document-server:
     container_name: onlyoffice-document-server
     image: onlyoffice/documentserver:latest
@@ -27,9 +49,9 @@ services:
     volumes:
       - document_data:/var/www/onlyoffice/Data
       - document_log:/var/log/onlyoffice
-  nginx:
-    container_name: nginx-server
-    image: nginx
+  caddy:
+    container_name: caddy-server
+    image: abiosoft/caddy:no-stats
     stdin_open: true
     tty: true
     restart: always
@@ -38,8 +60,16 @@ services:
       - 443:443
     networks:
       - onlyoffice
+    environment:
+    - CADDYPATH=/certs
+    - ACME_AGREE=true
+    # CHANGE THESE OR THE CONTAINER WILL FAIL TO RUN
+    - CADDY_LETSENCRYPT_EMAIL=certificates@example.com
+    - CADDY_EXTERNAL_DOMAIN=mydomain.com
+    - CADDY_PROXY_URL=http://app:80
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./data/letsencrypt:/certs:rw
+      - ./Caddyfile:/etc/Caddyfile:ro
       - app_data:/var/www/html
 networks:
   onlyoffice:
@@ -48,4 +78,5 @@ volumes:
   document_data:
   document_log:
   app_data:
+  db: 
   mysql_data:

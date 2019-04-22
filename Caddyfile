@@ -4,7 +4,7 @@
   gzip
 
   # Automatic TLS
-  # tls {$CADDY_LETSENCRYPT_EMAIL}
+  tls {$CADDY_LETSENCRYPT_EMAIL}
 
   # Service discovery via well-known
   redir /.well-known/carddav /remote.php/carddav 301
@@ -15,7 +15,8 @@
   }
   
   rewrite /docs {
-    r (.*) /{1}
+    r (.*) 
+    to /{1}
   }
   
   proxy / http://app:80 {
